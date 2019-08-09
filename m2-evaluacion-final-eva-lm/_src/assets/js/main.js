@@ -2,55 +2,54 @@
 //RECOJO
 const btn = document.querySelector(".js-button");
 const searchInput = document.querySelector(".js-search");
-let searchValue = "";
-
-// "Cogemos el valor del imput de texto para pasarselo a la llamada de la Api"
-/* const getValueFromInput = function() {
-  const searchValue = searchInput.value;
-  getDataFromServer(searchValue);
-}; */
-
-/* const getDataFromServer = function(ev) {
-  ev.preventDefault();
-  return fetch(`http://api.tvmaze.com/search/shows?q=${searchInput.value}`)
-  .then(response => response.json())
-  .then(data => {
-    console.log("Fetch data from server and return it as JSON >>> Return", data);
-  }
-}; */
+//let shows = [];
+let result = [];
 
 const getDataFromServer = () => {
+  let result = [];
   return fetch(`http://api.tvmaze.com/search/shows?q=${searchInput.value}`)
     .then(response => response.json())
     .then(data => {
-      console.log(data);
-      //data = formatData(data);
-      //saveDataInSeries(data);
-      //paintSeries();
+      formatData(data);
+      //saveData(data);
+      paintShows();
+      //console.log(data);
       // listenPalettes();
       // setPalettesIntoLocalStorage();
     });
 };
-btn.addEventListener("click", getDataFromServer);
 //FORMATEO Y GUARDO
-let result = [];
-const formatData = function() {
-  console.log(
-    "Guardamos en una array las series con los valores de titulo e imagen"
-  );
-  for (const element of data.result) {
+
+const formatData = function(data) {
+  //console.log(data);
+  for (const item of data) {
     result.push({
-      name: element.show.name.result
+      name: item.show.name,
+      image: item.show.image.medium
     });
   }
+  //console.log("Pedimos los datos a la api con un Fetch y los pasamos a JSON");
+  /*   console.log(
+    "Guardamos en una array las series con los valores de titulo e imagen"
+  ); */
+  console.log(result);
+  return result;
 };
-//console.log("Recogemos los valores del input y los guardamos en una constante");
-//console.log("Pedimos los datos a la api con un Fetch y los pasamos a JSON");
+
+/* const saveData = function(data) {
+  shows = data;
+}; */
 
 //PINTO
+
 const paintShows = function() {
-  console.log("Pintamos en el DOM el resultado de la busqueda");
+  const jsUl = document.querySelector(".js-ul");
+  jsUl.innerHTML = "";
+  for (let serieIndex = 0; serieIndex < result.length; serieIndex++) {
+    jsUl.innerHTML += `<li>${result[serieIndex].name}</li><li><img src=${result[serieIndex].image}></li>`;
+  }
 };
+
 //ESCUCHO
 
 const listenShows = function() {
@@ -58,14 +57,25 @@ const listenShows = function() {
 };
 
 //LEO
-const getActualShows = function() {
+const getClickedShows = function(ev) {
+  const currentTarget = ev.currentTarget;
+  const clickedSerieIndex = parseInt(currentTarget.dataset.index);
   console.log("Te dice que serie esta seleccionada");
+  return clickedSerieIndex;
 };
 
 const handleClick = function() {
   console.log(
     "generamos la función a partir del click anterior, o sea la metemos en favoritos o no"
   );
+  const serieIndex = getClickedShows(ev);
+  if (isFavoriteShow(serieIndex)) {
+      removeFavorite(serieIndex);
+  } else {
+      addFavorite(serieIndex);
+  }
+  paintShows();
+  listenShows();
 };
 
 const isFavoriteShow = function() {
@@ -79,3 +89,4 @@ const addFavorite = function() {
 const removeFavorite = function() {
   console.log("eliminamos de la lista de favoritos");
 };
+btn.addEventListener("click", getDataFromServer);
