@@ -1,5 +1,20 @@
-.main {
-  background-color: red;
+body {
+  background-color: pink;
   margin: 0;
   height: 100vh;
+}
+.selected {
+  background-color: darkred;
+  color: white;
+}
+.js-ul {
+  list-style: none;
+}
+.js-favorite {
+  list-style: none;
+}
+.js-li {
+  color: darkred;
+  font-size: 18px;
+  font-weight: bold;
 }

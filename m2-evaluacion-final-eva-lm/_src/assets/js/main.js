@@ -6,6 +6,16 @@ const searchInput = document.querySelector(".js-search");
 let favorites = [];
 let series = [];
 
+
+
+function setLocalStorage () {
+  localStorage.setItem('favorites', JSON.stringify(series));
+};
+function getLocalStorage () {
+  return JSON.parse(localStorage.getItem('favorites'));
+
+}
+
 const getDataFromServer = () => {
  series = [];
   return fetch(`http://api.tvmaze.com/search/shows?q=${searchInput.value}`)
@@ -15,7 +25,8 @@ const getDataFromServer = () => {
       paintShows();
       //console.log(data);
       listenShows();
-      // setPalettesIntoLocalStorage();
+      paintFavorites();
+      setLocalStorage();
     });
 };
 //FORMATEO Y GUARDO
@@ -56,6 +67,7 @@ const paintShows = function() {
   }
  jsUl.innerHTML = text;
  console.log(jsUl);
+ 
 };
 
 //ESCUCHO
@@ -90,19 +102,48 @@ const isFavoriteShow = function(index) {
   const serie = series[index];
   for (const favorite of favorites) {
     if (favorite.id === serie.id) {
-      return true;
+      //return true;
+      favorite.splice(favoriteIndex, 1);
+      serie.classList.toggle("selected");
     }
   }
-  return false;
+  //return false;
 };
 
 function addFavorite(index){
   favorites.push(series[index]);
+  paintFavorites();
+};
+
+function paintFavorites() {
+const favoriteList = document.querySelector(".js-favorite");
+let addText = "";
+for (let favoriteIndex = 0; favoriteIndex < favorites.length; favoriteIndex++) {
+  addText += `<li class="item-favorite" data-index="${favoriteIndex}">
+  ${favorites[favoriteIndex].name}
+    <img src="${favorites[favoriteIndex].image}">
+  </li>`;
+}
+favoriteList.innerHTML = addText;
+getLocalStorage();
 };
 
 const removeFavorite = function(index) {
-  
-  favorites.splice(favoriteIndex, id);
+  for (const favorite of favorites) {
+    favorite.splice(favoriteIndex, 1);
+  }
 };
 
+function handleClick (ev) {
+  const serieIndex = getClikedShows(ev);
+  if (isFavoriteShow(serieIndex)) {
+    removeFavorite(series);
+  } else {
+    addFavorite(series).classList.add("selected");
+  }
+  paintShows();
+  listenShows();
+  paintFavorites();
+};
 btn.addEventListener("click", getDataFromServer);
+
