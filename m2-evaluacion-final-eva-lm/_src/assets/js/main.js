@@ -2,18 +2,21 @@
 //RECOJO
 const btn = document.querySelector(".js-button");
 const searchInput = document.querySelector(".js-search");
-//let shows = [];
 let favorites = [];
 let series = [];
 
 
 
 function setLocalStorage () {
-  localStorage.setItem('favorites', JSON.stringify(series));
+  localStorage.setItem('favorites', JSON.stringify(favorites));
 };
-function getLocalStorage () {
-  return JSON.parse(localStorage.getItem('favorites'));
 
+function getLocalStorage () {
+  const localStorageFavorites = JSON.parse(localStorage.getItem('favorites'));
+  if (localStorageFavorites !== null) {
+    favorites = localStorageFavorites;
+    paintFavorites();
+  }
 }
 
 const getDataFromServer = () => {
@@ -23,16 +26,13 @@ const getDataFromServer = () => {
     .then(data => {
       formatData(data);
       paintShows();
-      //console.log(data);
       listenShows();
       paintFavorites();
-      setLocalStorage();
     });
 };
 //FORMATEO Y GUARDO
 
 const formatData = function(data) {
-  //console.log(data);
   for (const item of data) {
     if (item.show.image === null) {
       series.push({
@@ -48,10 +48,7 @@ const formatData = function(data) {
     });
   }
   }
-  //console.log("Pedimos los datos a la api con un Fetch y los pasamos a JSON");
-  /*   console.log(
-    "Guardamos en una array las series con los valores de titulo e imagen"
-  ); */
+
 };
 
 //PINTO
@@ -85,16 +82,14 @@ function getClikedShows(ev) {
  //Te dice que serie esta seleccionada
   const index = parseInt(ev.currentTarget.dataset.index);
   if (isFavoriteShow(index)) {
-    
     removeFavorite(index)
-    // borro
   } else {
-   
     addFavorite(index);
-    // añado
   }
+  setLocalStorage();
   paintShows();
   listenShows();
+  paintFavorites();
   console.log(favorites);
 };
 
@@ -102,12 +97,10 @@ const isFavoriteShow = function(index) {
   const serie = series[index];
   for (const favorite of favorites) {
     if (favorite.id === serie.id) {
-      //return true;
-      favorite.splice(favoriteIndex, 1);
-      serie.classList.toggle("selected");
+      return true;
     }
   }
-  //return false;
+  return false;
 };
 
 function addFavorite(index){
@@ -125,12 +118,14 @@ for (let favoriteIndex = 0; favoriteIndex < favorites.length; favoriteIndex++) {
   </li>`;
 }
 favoriteList.innerHTML = addText;
-getLocalStorage();
 };
 
 const removeFavorite = function(index) {
-  for (const favorite of favorites) {
-    favorite.splice(favoriteIndex, 1);
+  const serie = series[index];
+  for (let i = 0; i < favorites.length; i++) {
+    if (serie.id === favorites[i].id) {
+      favorites.splice(i, 1);
+    }
   }
 };
 
@@ -139,7 +134,7 @@ function handleClick (ev) {
   if (isFavoriteShow(serieIndex)) {
     removeFavorite(series);
   } else {
-    addFavorite(series).classList.add("selected");
+    addFavorite(series);
   }
   paintShows();
   listenShows();
@@ -147,3 +142,4 @@ function handleClick (ev) {
 };
 btn.addEventListener("click", getDataFromServer);
 
+getLocalStorage();
