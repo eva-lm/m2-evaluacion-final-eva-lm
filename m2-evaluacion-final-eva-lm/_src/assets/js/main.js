@@ -6,7 +6,7 @@ const searchInput = document.querySelector(".js-search");
 let result = [];
 
 const getDataFromServer = () => {
-  let result = [];
+ result = [];
   return fetch(`http://api.tvmaze.com/search/shows?q=${searchInput.value}`)
     .then(response => response.json())
     .then(data => {
@@ -23,10 +23,17 @@ const getDataFromServer = () => {
 const formatData = function(data) {
   //console.log(data);
   for (const item of data) {
+    if (item.show.image === null) {
+      result.push({
+        name: item.show.name,
+        image:"https://via.placeholder.com/210x295/ffffff/666666/?text=TV"
+      });
+    } else {
     result.push({
       name: item.show.name,
       image: item.show.image.medium
     });
+  }
   }
   //console.log("Pedimos los datos a la api con un Fetch y los pasamos a JSON");
   /*   console.log(
@@ -37,7 +44,7 @@ const formatData = function(data) {
 };
 
 /* const saveData = function(data) {
-  shows = data;
+  result = data;
 }; */
 
 //PINTO
@@ -46,24 +53,12 @@ const paintShows = function() {
   const jsUl = document.querySelector(".js-ul");
   jsUl.innerHTML = "";
   for (let serieIndex = 0; serieIndex < result.length; serieIndex++) {
-    jsUl.innerHTML += `<li>${result[serieIndex].name}</li><li><img src=${result[serieIndex].image}></li>`;
+    jsUl.innerHTML += `<li class="js-li">${result[serieIndex].name}</li><li class="js-li"><img src=${result[serieIndex].image}></li>`;
   }
+ 
 };
 
 //ESCUCHO
-
-const listenShows = function() {
-  console.log("Escuchamos en donde hacemos click");
-};
-
-//LEO
-const getClickedShows = function(ev) {
-  const currentTarget = ev.currentTarget;
-  const clickedSerieIndex = parseInt(currentTarget.dataset.index);
-  console.log("Te dice que serie esta seleccionada");
-  return clickedSerieIndex;
-};
-
 const handleClick = function() {
   console.log(
     "generamos la función a partir del click anterior, o sea la metemos en favoritos o no"
@@ -78,15 +73,39 @@ const handleClick = function() {
   listenShows();
 };
 
+const listenShows = function() {
+  console.log("Escuchamos en donde hacemos click");
+  const serieElements = document.querySelectorAll(".js-li");
+    for (const serieElement of serieElements) {
+        serieElement.addEventListener("click", handleClick);
+    }
+};
+
+//LEO
+const getClickedShows = function(ev) {
+  const currentTarget = ev.currentTarget;
+  const clickedSerieIndex = parseInt(currentTarget.dataset.index);
+  console.log("Te dice que serie esta seleccionada");
+  return clickedSerieIndex;
+};
+
+
+
 const isFavoriteShow = function() {
   console.log("Leemos si la serie está en favorito o no");
+  
 };
+
 
 const addFavorite = function() {
   console.log("Añadimos a la lista favoritos si no está");
+  serieIndex.classList.add("selected");
+
 };
 
 const removeFavorite = function() {
   console.log("eliminamos de la lista de favoritos");
+  serieIndex.classList.add("unselected");
+
 };
 btn.addEventListener("click", getDataFromServer);
